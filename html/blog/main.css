@@ -1,0 +1,39 @@
+/*
+ *
+ * Body
+ *
+ */
+
+hr{
+  width: 100%;
+  margin: 0 0 5px;
+  height: 2px;
+  background-color: #000;
+}
+
+.post {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 10px;
+}
+
+/*
+ *
+ * Element
+ *
+ */
+
+.post__title { font-weight: bold;}
+
+.post__time {
+  color: grey;
+  margin-left: auto;
+}
+
+.post__options { margin-left: 2em;}
+
+.post__body {
+  margin: 0 0 1em;
+  width: 100%;
+  white-space: pre-wrap;
+}

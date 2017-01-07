@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport"
+    content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+
+    <title>{{title}}</title>
+    <style>
+{{style}}
+    </style>
+  </head>
+
+  <body>
+    <a href='/signup' class='button --grey-btn' {{hide}}>Sign Up</a>
+    <h2>{{title}}</h2>
+
+    <form method="post">
+      <table>
+        <tr>
+          <td class="label" >Username</td>
+    	  <td><input type="text" name="username"></td>
+        </tr>
+
+        <tr>
+          <td class="label" >Password</td>
+    	  <td><input type="password" name="password" ></td>
+        </tr>
+
+        <tr>
+          <td colspan="2" class="error" >{{error}}</td>
+        </tr>
+
+        <tr>
+    	  <td><input type="submit" ></td>
+          <td></td>
+        </tr>
+      </table>
+    </form>
+
+  </body>
+</html>

@@ -1,0 +1,86 @@
+body {
+  font-family: sans-serif;
+  font-size: 20px;
+  max-width: 550px;
+  width: 100%;
+}
+
+/* 
+ * Media
+ */
+@media only screen and (max-width: 560px) {
+  body { margin: 0 10px 0 0;}
+  .signup-tbl { font-size: 12px;}
+}
+
+@media only screen and (min-width: 450px) {
+  .button { margin-right: 75px;}
+}
+
+@media only screen and (min-width: 560px) {
+  .button { margin-right: 150px;}
+}
+
+
+/* 
+ * Block
+ */
+.label {
+  text-align: right;
+  padding-right: 5px;
+}
+
+.error {
+  color: red;
+  padding-left: 5px;
+}
+
+.button {
+  border: 3px outset #888;
+  border-radius: 5px;
+  padding: 10px 20px;
+  float: right;
+
+  font-weight: bold;
+  text-decoration: none;
+  color: black;
+}
+
+.show {
+  margin-top: 1em;
+  font-family: monospace;
+  font-size: 0.75em;
+}
+
+
+/* 
+ * Element
+ */
+.show th,
+.show td { border: 1px solid black;}
+
+
+/* 
+ * Modifier
+ */
+.--grey-txt {
+  color: grey;
+}
+
+.--small-btn {
+  padding: 5px;
+  font-size: 0.75em;
+  margin-top: 6px;
+}
+
+.--grey-btn {
+  color: #333;
+  background-color: #ddd;
+  border-color: #ddd;
+}
+
+.--grey-btn:hover {
+  color: #f0f0f0;
+  background-color: #888;
+  border-color: #888;
+}

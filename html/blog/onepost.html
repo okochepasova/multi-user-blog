@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block content %}
+  <div class='post'>
+    <div class='post__title'>{{post.subject}}</div>
+    <div class='post__options --smaller-text'>
+      <button type="submit" onclick="{{act_edit}}" >Edit</button>
+      <button type="submit" onclick="{{act_del}}" >Delete</button>
+      <button type="submit" onclick="{{act_like}}" >&lt;3</button>
+    </div>
+    <div class='post__time --smaller-text'>{{post.created.date()}}</div>
+    <hr>
+    <p class='post__body --smaller-text'>{{post.content}}</p>
+  </div>
+  <button type="submit" onclick="window.location='/comment';" >Comment</button>
+{% for c in comments %}
+  <div class='comment'>
+    <div class='comment__title'>{{c.user}}</div>
+    <div class='comment__time'>{{c.created}}</div>
+    <div class='comment__body'>{{c.content}}</div>
+  </div>
+{% endfor %}
+{% endblock %}

@@ -1,0 +1,19 @@
+h4 { margin: 1.5em 5px 1em;}
+
+form {margin: 5px;}
+
+label {
+  display: block;
+  margin-top: 1em;
+}
+
+input[type=text],
+textarea {
+  max-width: 400px;
+  width: 100%;
+  font-family: monospace;
+}
+
+textarea { height: 400px;}
+
+.error { color: red;}

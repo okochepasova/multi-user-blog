@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block content %}
+{% for p in posts %}
+  <div class='post'>
+    <a href='/?id={{p.key().id()}}' class='post__title'>{{p.subject}}</a>
+    <div class='post__options --smaller-text'>by: {{p.user}}</div>
+    <div class='post__time --smaller-text'>{{p.created.date()}}</div>
+	<hr>
+    <p class='post__body --smaller-text'>{{p.content}}</p>
+  </div>
+{% endfor %}
+{% endblock %}

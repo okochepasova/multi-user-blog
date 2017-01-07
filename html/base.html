@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport"
+    content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+
+    <title>Basic Blog</title>
+    <style>
+    body {
+      font-family: sans-serif;
+      font-size: 20px;
+      width: 100%;
+      margin: 0 10px 0 0;
+    }
+    h1 { text-align: center;}
+    a {
+      text-decoration: none;
+      color: black;
+    }
+
+    /*
+     * Media
+     */
+    @media only screen and (min-width: 800px) {
+      body {
+        max-width: 800px;
+        margin: 0 auto;
+      }
+    }
+    @media only screen and (min-width: 1050px) {
+      body {
+        max-width: 1000px;
+        margin: 0 auto;
+      }
+    }
+
+    {{style}}
+
+    /*
+     *
+     * Modifiers
+     *
+     */
+    .--larger-text{ font-size: 1.2em;}
+    .--smaller-text{ font-size: 0.85em;}
+    </style>
+  </head>
+
+  <body>
+    <h1><a href='/'>Basic Blog</a></h1>
+
+    {% block content %}
+    {% endblock %}
+  </body>
+</html>

@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport"
+    content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+
+    <title>Sign Up</title>
+    <style>
+{{style}}
+    </style>
+  </head>
+
+  <body>
+    <a href='/login' class='button --grey-btn' {{hide}}>Login</a>
+    <h2>Sign Up</h2><!--"username", "password", "verify", and "email"-->
+    <form method="post">
+      <table class='signup-tbl'>
+        <tr>
+          <td class="label" >Username</td>
+    	  <td><input type="text" name="username" value="{{username}}"></td>
+    	  <td class="error" >{{user_error}}</td>
+        </tr>
+
+        <tr>
+          <td class="label" >Password</td>
+    	  <td><input type="password" name="password" ></td>
+    	  <td class="error" >{{pass_error}}</td>
+        </tr>
+
+        <tr>
+          <td class="label" >Verify</td>
+    	  <td><input type="password" name="verify" ></td>
+    	  <td class="error" >{{verify_error}}</td>
+        </tr>
+
+        <tr>
+          <td class="label" >Email*</td>
+    	  <td><input type="text" name="email"  value="{{email}}"></td>
+    	  <td class="error" >{{email_error}}</td>
+        </tr>
+
+        <tr>
+          <td colspan="3"><br></td>
+        </tr>
+
+        <tr>
+    	  <td class="label --grey-txt">* optional</td>
+    	  <td><input type="submit" ></td>
+          <td></td>
+        </tr>
+      </table>
+    </form>
+  </body>
+</html>
