@@ -240,7 +240,6 @@ class CommentPage(Handler):
     def get(self):
         if self.get_username():
             self.run()
-           # self.show_table(Comment.all())
         else: self.redirect('/login')
 
     def post(self):
@@ -291,25 +290,6 @@ class CommentPage(Handler):
                         error=error, content=content)
         else: self.redirect('/')
 
-    def show_table(self, table):
-        self.write("\n<table class='show'>")
-        self.write('''
-  <tr>
-    <th>User</th>
-    <th>post_id</th>
-    <th>Content</th>
-  </tr>\n'''
-        )
-        for item in table:
-            self.write('''
-  <tr>
-    <td>%s</td>
-    <td>%s</td>
-    <td>%s</td>
-  </tr>\n'''%(item.user, str(item.post_id), item.content)
-            )
-        self.write('</table>\n')
-
 
 #
 # Signup
@@ -317,9 +297,6 @@ class CommentPage(Handler):
 class SignupPage(Handler):
     def get(self):
         self.run()
-       # users=User.all() # User.all() = db.GqlQuery("SELECT * FROM User;")
-       # self.show_table(users)
-       # del_data(users)
 
     def post(self):
         # Variables
@@ -370,25 +347,6 @@ class SignupPage(Handler):
         self.render('signup/signup.html', style=style, user_error=user_error,
                     pass_error=pass_error, verify_error=verify_error,
                     email_error=email_error, username=username, email=email)
-
-    def show_table(self, table):
-        self.write("\n<table class='show'>")
-        self.write('''
-  <tr>
-    <th>Name</th>
-    <th>Password</th>
-    <th>Email</th>
-  </tr>\n'''
-        )
-        for item in table:
-            self.write('''
-  <tr>
-    <td>%s</td>
-    <td>%s</td>
-    <td>%s</td>
-  </tr>\n'''%(item.name, item.password,str(item.email))
-            )
-        self.write('</table>\n')
 
 
 class WelcomePage(Handler):
