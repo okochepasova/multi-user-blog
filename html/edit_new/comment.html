@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block content %}
+<a href='/?id={{id}}' class='button --grey-btn --small-btn' {{hide}}>Cancel</a>
+{% if hide: %}
+<h4 class='--larger-text'>create new comment</h4>
+{% else: %}
+<h4 class='--larger-text'>edit comment</h4>
+{% endif %}
+<form method='post' class='--smaller-text'>
+  <label>
+    <div>Content:</div>
+    <textarea name='content'>{{content}}</textarea>
+  </label>
+
+  <div class='error'>{{error}}</div>
+  <input type='submit'>
+</form>
+{% endblock %}

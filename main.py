@@ -124,7 +124,7 @@ class Handler(webapp2.RequestHandler):
         self.write(self.render_str(template, **kw))
 
     # Extra
-    def get_username(self, username):
+    def get_username(self):
         return check_secure_val(self.request.cookies.get('username'))
 
     def to_welcome(self, username):
@@ -162,9 +162,9 @@ class MainPage(Handler):
 
     def one_post(self, post):
         # Variables
-        style = self.render_str('blog/main.css')
-        name = self.get_username('username')
+        name = self.get_username()
         id = self.request.get('id')
+        comments = Comment.gql("WHERE post_id = %d ORDER BY created DESC"%long(id))
 
         # Button Data.
         # Case 0: NOT a valid User
@@ -184,39 +184,39 @@ class MainPage(Handler):
   #          act3= ""
 
         # Output
+        style = self.render_str('blog/main.css')
+        style += self.render_str('blog/comment.css')
         self.render('blog/onepost.html', style=style, post=post, act_edit=act1,
-                    act_del=act2, act_like=act3, comments=[])
+                    act_del=act2, act_like=act3, comments=comments, id=id)
 
 
 class NewPostPage(Handler):
     def run(self, subject='', content='', error=''):
-        name = self.get_username('username')
         id = self.request.get('id')
         hide='hidden'
 
-        if name:
-            # Info 4 Editing a Post
-            if id:
-                p=Post.get_by_id(long(id))
-                if p and p.user == name:
-                    hide=''
-                    subject= p.subject
-                    content= p.content
-                else: self.redirect('/?id='+str(id))
+        # Info 4 Editing a Post
+        if id:
+            p=Post.get_by_id(long(id))
+            if p and p.user == self.get_username():
+                hide=''
+                subject= p.subject
+                content= p.content
+            else: self.redirect('/?id='+str(id))
 
-            # Builds the Template
-            style = self.render_str('blog/form.css')
-            style += self.render_str('signup/main.css')
-            self.render('blog/newpost.html', style=style, error=error, id=id,
-                        subject=subject, content=content, hide=hide)
-        else: self.redirect('/login')
+        # Builds the Template
+        style = self.render_str('edit_new/form.css')
+        style += self.render_str('signup/main.css')
+        self.render('edit_new/newpost.html', style=style, error=error, id=id,
+                    subject=subject, content=content, hide=hide)
 
     def get(self):
-        self.run()
+        if self.get_username(): self.run()
+        else: self.redirect('/login')
 
     def post(self):
         id = self.request.get('id')
-        name = self.get_username('username')
+        name = self.get_username()
         subject = self.request.get('subject')
         content = self.request.get('content')
 
@@ -228,12 +228,87 @@ class NewPostPage(Handler):
                     p.content = content
                     p.put()
             else:
-                p=Post(subject=subject,content=content,user=name)
+                p=Post(subject=subject, content=content, user=name)
                 id = p.put().id()
             self.redirect('/?id='+str(id))
         else:
             error="We need both a subject and some content!"
             self.run(subject, content, error)
+
+
+class CommentPage(Handler):
+    def get(self):
+        if self.get_username():
+            self.run()
+           # self.show_table(Comment.all())
+        else: self.redirect('/login')
+
+    def post(self):
+        id = self.request.get('id')
+        name = self.get_username()
+        content = self.request.get('content')
+
+        if content:
+            if id:
+                p = Post.get_by_id(long(id))
+                c = Comment.get_by_id(long(id))
+                # Creating new Comment
+                if p:
+                    c = Comment(post_id=long(id), user=name, content=content)
+                    c.put()
+                # Edditing Comment
+                elif c and c.user == name:
+                    c.content = content
+                    c.put()
+                    id = c.post_id
+                else: self.error_page(id)
+
+                self.redirect('/?id='+str(id))
+            else:
+                error='None<br>WTF did you do to get here? No SRL, tell me.'
+                self.error_page(error)
+        else: self.run(content, "We need some content!")
+
+    def run(self, content='', error=''):
+        # Variables
+        id = self.request.get('id')
+        hide='hidden'
+
+        if id:
+            # Info 4 Editing a Comment
+            p = Post.get_by_id(long(id))
+            c = Comment.get_by_id(long(id))
+            if c and c.user == self.get_username():
+                hide=''
+                content= c.content
+            elif p: pass
+            else: self.redirect('/?id='+str(id))
+
+            # Builds the Template
+            style = self.render_str('edit_new/form.css')
+            style += self.render_str('signup/main.css')
+            self.render('edit_new/comment.html', style=style, hide=hide,
+                        error=error, content=content)
+        else: self.redirect('/')
+
+    def show_table(self, table):
+        self.write("\n<table class='show'>")
+        self.write('''
+  <tr>
+    <th>User</th>
+    <th>post_id</th>
+    <th>Content</th>
+  </tr>\n'''
+        )
+        for item in table:
+            self.write('''
+  <tr>
+    <td>%s</td>
+    <td>%s</td>
+    <td>%s</td>
+  </tr>\n'''%(item.user, str(item.post_id), item.content)
+            )
+        self.write('</table>\n')
 
 
 #
@@ -318,7 +393,7 @@ class SignupPage(Handler):
 
 class WelcomePage(Handler):
     def get(self):
-        name = self.get_username('username')
+        name = self.get_username()
 
         if name:
             self.write("<title>Welcome</title>\n")
@@ -352,14 +427,14 @@ class LoginPage(Handler):
                     error=error)
 
 
-class LogOutHandler(Handler):
+class LogOutPage(Handler):
     def get(self):
-        if self.get_username('username'): self.run()
+        if self.get_username(): self.run()
         else: self.redirect('/signup')
 
     def post(self):
         # Variables
-        name = self.get_username('username')
+        name = self.get_username()
         username = self.request.get('username')
         password = self.request.get('password')
 
@@ -393,5 +468,6 @@ app = webapp2.WSGIApplication([
     ('/signup', SignupPage),
     ('/welcome', WelcomePage),
     ('/login', LoginPage),
-    ('/logout', LogOutHandler)
+    ('/logout', LogOutPage),
+    ('/comment', CommentPage)
 ], debug=True)

@@ -1,0 +1,52 @@
+.comment {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 10px;
+  font-size: 0.9em;
+
+  color: #000;
+  border: 1px solid #888;
+  border-radius: 5px;
+}
+
+
+/*
+ *
+ * Element
+ *
+ */
+
+.comment__title {
+  font-weight: bold;
+  margin: 5px;
+}
+
+.comment__time {
+  color: grey;
+  margin: 0.4em 5px 5px 2em;
+}
+
+.comment__options { margin: 5px 5px 5px auto;}
+
+.comment__body {
+  margin: 0.5em 5px 5px;
+  width: 100%;
+  white-space: pre-wrap;
+}
+
+
+/*
+ *
+ * Modifiers
+ *
+ */
+
+.--grey-cmnt {
+  background-color: #ddd;
+  border-color: #888;
+}
+
+.--silver-cmnt {
+  background-color: #f0f0f0;
+  border-color: #ddd;
+}

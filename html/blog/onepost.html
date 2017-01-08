@@ -11,12 +11,12 @@
     <hr>
     <p class='post__body --smaller-text'>{{post.content}}</p>
   </div>
-  <button type="submit" onclick="window.location='/comment';" >Comment</button>
+  <button type="submit" onclick="window.location='/comment?id={{id}}';" >Comment</button>
 {% for c in comments %}
-  <div class='comment'>
-    <div class='comment__title'>{{c.user}}</div>
-    <div class='comment__time'>{{c.created}}</div>
-    <div class='comment__body'>{{c.content}}</div>
+  <div class='comment --silver-cmnt'>
+    <div class='comment__title --larger-text'>{{c.user}}:</div>
+    <div class='comment__time'>{{c.created.date()}}</div>
+    <div class='comment__body --smaller-text'>{{c.content}}</div>
   </div>
 {% endfor %}
 {% endblock %}
