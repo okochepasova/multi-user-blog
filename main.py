@@ -144,7 +144,9 @@ class MainPage(Handler):
         style = self.render_str('blog/main.css')
         posts = Post.gql("ORDER BY created DESC LIMIT 10;")
        # del_data(posts)
-        self.render('blog/home.html', style=style, posts=posts)
+        self.render('header.html', name=self.get_username())
+        self.render('blog/home.html', style=style, posts=posts, 
+                    name=self.get_username())
 
     def get(self):
         id = self.request.get('id')
@@ -158,7 +160,9 @@ class MainPage(Handler):
         style = self.render_str('blog/main.css')
         time = datetime.date.today()
         self.error(404)
-        self.render('blog/error.html', style=style, id=id, time=time)
+        self.render('header.html', name=self.get_username())
+        self.render('blog/error.html', style=style, id=id, time=time, 
+                    name=self.get_username())
 
     def one_post(self, post):
         # Variables
@@ -186,8 +190,10 @@ class MainPage(Handler):
         # Output
         style = self.render_str('blog/main.css')
         style += self.render_str('blog/comment.css')
+        self.render('header.html', name=self.get_username())
         self.render('blog/onepost.html', style=style, post=post, act_edit=act1,
-                    act_del=act2, act_like=act3, comments=comments, id=id)
+                    act_del=act2, act_like=act3, comments=comments, id=id,
+                    name=name)
 
 
 class NewPostPage(Handler):

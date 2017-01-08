@@ -1,0 +1,26 @@
+<!doctype html>
+<style>
+.header {
+  display: flex;
+  padding: 10px 5px;
+  background-color: #888;
+  color: #f0f0f0;
+}
+.--right { margin-left: auto;}
+</style>
+
+<div class='header'>
+  {% if name %}
+  <div>Welcome, {{name}}</div>
+  <div class='--right'>
+    <button type="submit" onclick="window.location='/newpost';">New Post</button>
+    <button type="submit" onclick="window.location='/logout';">Log Out</button>
+  </div>
+  {% else %}
+  <div>Welcome, Visitor</div>
+  <div class='--right'>
+    <button type="submit" onclick="window.location='/signup';">Sign Up</button>
+    <button type="submit" onclick="window.location='/login';">Login</button>
+  </div>
+  {% endif %}
+</div>

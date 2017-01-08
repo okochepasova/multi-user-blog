@@ -16,6 +16,20 @@
   <div class='comment --silver-cmnt'>
     <div class='comment__title --larger-text'>{{c.user}}:</div>
     <div class='comment__time'>{{c.created.date()}}</div>
+    <div class='comment__options --smaller-text'>
+    {% if not name %}
+      <button type="submit" onclick="window.location='/login';" >Edit</button>
+      <button type="submit" onclick="window.location='/login';" >Delete</button>
+    {% elif name == c.user %}
+      <button type="submit" onclick="window.location='/comment?id={{c.key().id()}}'" >
+        Edit
+      </button>
+      <button type="submit" onclick="" >Delete</button>
+    {% else %}
+      <button type="submit" onclick="alert('Action not allowed.')" >Edit</button>
+      <button type="submit" onclick="alert('Action not allowed.')" >Delete</button>
+    {% endif %}
+    </div>
     <div class='comment__body --smaller-text'>{{c.content}}</div>
   </div>
 {% endfor %}
