@@ -165,8 +165,8 @@ class MainPage(Handler):
     def one_post(self, post):
         # Variables
         name = self.get_username()
-        id = self.request.get('id')
-        comments = Comment.gql("WHERE post_id = %d ORDER BY created DESC"%long(id))
+        id = long(self.request.get('id'))
+        comments = Comment.gql("WHERE post_id = %d ORDER BY created DESC"%id)
 
         # Button Data.
         # Case 0: NOT a valid User
@@ -176,8 +176,8 @@ class MainPage(Handler):
 
         if name and name == post.user:
             # Case 1: valid User matches current Post
-            act1= "window.location='newpost?id=%d';"%long(id)
- #           act2= ""
+            act1= "window.location='newpost?id=%d';"%id
+            act2= "window.location='/delete?id=%d';"%id
             act3= "alert('Action not allowed.')"
         elif name:
             # Case 2: valid User DOESN'T match current Post
@@ -188,9 +188,10 @@ class MainPage(Handler):
         # Output
         style = self.render_str('blog/main.css')
         style += self.render_str('blog/comment.css')
-        self.render('header.html', name=self.get_username())
+        self.render('header.html', name=name)
         self.render('blog/onepost.html', style=style, post=post, act_edit=act1,
-                    act_del=act2, act_like=act3, comments=comments, id=id)
+                    act_del=act2, act_like=act3, comments=comments, name=name,
+                    id=id)
 
 
 class NewPostPage(Handler):
@@ -252,11 +253,12 @@ class CommentPage(Handler):
 
         if content:
             if id:
-                p = Post.get_by_id(long(id))
-                c = Comment.get_by_id(long(id))
+                id=long(id)
+                p = Post.get_by_id(id)
+                c = Comment.get_by_id(id)
                 # Creating new Comment
                 if p:
-                    c = Comment(post_id=long(id), user=name, content=content)
+                    c = Comment(post_id=id, user=name, content=content)
                     c.put()
                 # Edditing Comment
                 elif c and c.user == name:
@@ -418,6 +420,28 @@ class LogOutPage(Handler):
         self.render('signup/loginout.html', title='Logout', style=style,
                     error=error, hide='hidden')
 
+class DeletePage(Handler):
+    def get(self):
+        name = self.get_username()
+        id = self.request.get('id')
+
+        if name:
+            if id:
+                id = long(id)
+                p = Post.get_by_id(id)
+                c = Comment.get_by_id(id)
+                if p:
+                    del_data(Comment.gql("WHERE post_id = %d"%id))
+                    p.delete()
+                    self.redirect('/')
+                elif c:
+                    id = c.post_id
+                    c.delete()
+                    self.redirect('/?id=%d'%id)
+                else: self.redirect('/?id=%d'%id)
+            else: self.redirect('/')
+        else: self.redirect('/signup')
+
 
 #
 # Output
@@ -430,5 +454,6 @@ app = webapp2.WSGIApplication([
     ('/welcome', WelcomePage),
     ('/login', LoginPage),
     ('/logout', LogOutPage),
-    ('/comment', CommentPage)
+    ('/comment', CommentPage),
+    ('/delete', DeletePage)
 ], debug=True)

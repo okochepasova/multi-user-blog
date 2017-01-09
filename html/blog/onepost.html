@@ -24,7 +24,9 @@
       <button type="submit" onclick="window.location='/comment?id={{c.key().id()}}'" >
         Edit
       </button>
-      <button type="submit" onclick="" >Delete</button>
+      <button type="submit" onclick="window.location='/delete?id={{c.key().id()}}'" >
+        Delete
+      </button>
     {% else %}
       <button type="submit" onclick="alert('Action not allowed.')" >Edit</button>
       <button type="submit" onclick="alert('Action not allowed.')" >Delete</button>
