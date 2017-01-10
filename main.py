@@ -168,6 +168,10 @@ class MainPage(Handler):
         id = long(self.request.get('id'))
         comments = Comment.gql("WHERE post_id = %d ORDER BY created DESC"%id)
 
+        likes = []
+        users = User.gql("WHERE name = '%s'"%name)
+        if name and users: likes =users.get().likes
+
         # Button Data.
         # Case 0: NOT a valid User
         act1= "window.location='/login';"
@@ -191,7 +195,7 @@ class MainPage(Handler):
         self.render('header.html', name=name)
         self.render('blog/onepost.html', style=style, post=post, act_edit=act1,
                     act_del=act2, act_like=act3, comments=comments, name=name,
-                    id=id)
+                    id=id, likes=likes)
 
 
 class NewPostPage(Handler):
@@ -437,7 +441,9 @@ class DeletePage(Handler):
                     del_data(Comment.gql("WHERE post_id = %d"%id))
                     # Remove post from likes
                     for u in User.all():
-                        if id in u.likes: u.likes.remove(id)
+                        if str(id) in u.likes:
+                            u.likes.remove(str(id))
+                            u.put()
                     p.delete()
                     self.redirect('/')
 
@@ -469,6 +475,8 @@ class LikePage(Handler):
                     u.likes.remove(id)
                 elif p:
                     u.likes.append(id)
+
+                u.put()
                 self.redirect('/?id=%s'%id)
 
             else: self.redirect('/')
