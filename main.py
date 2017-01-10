@@ -15,7 +15,7 @@ import string
 
 # NOTES
 #
-# name = "Blah" - stored in User.name and Post.user
+# name = "Blah" - stored in User.name, Post.user and Comment.user
 # user = "Blah|CodeCodeCode" - stored in 'username' cookie
 # username = "Bl-ah?" - text from 'username' input; can be correct or not
 #
@@ -176,14 +176,14 @@ class MainPage(Handler):
 
         if name and name == post.user:
             # Case 1: valid User matches current Post
-            act1= "window.location='newpost?id=%d';"%id
+            act1= "window.location='/newpost?id=%d';"%id
             act2= "window.location='/delete?id=%d';"%id
             act3= "alert('Action not allowed.')"
         elif name:
             # Case 2: valid User DOESN'T match current Post
             act1= "alert('Action not allowed.')"
             act2= "alert('Action not allowed.')"
-  #          act3= ""
+            act3= "window.location='/like?id=%d';"%id
 
         # Output
         style = self.render_str('blog/main.css')
@@ -375,8 +375,8 @@ class LoginPage(Handler):
 
         # Validation
         if username and password:
-            users = User.gql("WHERE name = '%s';"%username)
-            u = users.get()
+            u = User.gql("WHERE name = '%s';"%username).get()
+
             # Varify Password
             if u and valid_pw(u.name, password, u.password):
                 self.to_welcome(u.name)
@@ -403,8 +403,8 @@ class LogOutPage(Handler):
 
         # Validation
         if username and password and name == username:
-            users = User.gql("WHERE name = '%s';"%username)
-            u = users.get()
+            u = User.gql("WHERE name = '%s';"%username).get()
+
             # Varify Password
             if u and valid_pw(u.name, password, u.password):
                 self.response.headers['Content-Type'] = 'text/plain'
@@ -420,6 +420,7 @@ class LogOutPage(Handler):
         self.render('signup/loginout.html', title='Logout', style=style,
                     error=error, hide='hidden')
 
+
 class DeletePage(Handler):
     def get(self):
         name = self.get_username()
@@ -430,15 +431,46 @@ class DeletePage(Handler):
                 id = long(id)
                 p = Post.get_by_id(id)
                 c = Comment.get_by_id(id)
+
+                # Id of a Post
                 if p:
                     del_data(Comment.gql("WHERE post_id = %d"%id))
+                    # Remove post from likes
+                    for u in User.all():
+                        if id in u.likes: u.likes.remove(id)
                     p.delete()
                     self.redirect('/')
+
+                # Id of a Comment
                 elif c:
                     id = c.post_id
                     c.delete()
                     self.redirect('/?id=%d'%id)
+
+                # Bad given Id
                 else: self.redirect('/?id=%d'%id)
+
+            else: self.redirect('/')
+        else: self.redirect('/signup')
+
+
+class LikePage(Handler):
+    def get(self):
+        name = self.get_username()
+        id = self.request.get('id')
+
+        if name:
+            if id:
+                p = Post.get_by_id(long(id))
+                u = User.gql("WHERE name = '%s'"%name).get()
+                id = str(id)
+
+                if p and (id in u.likes):
+                    u.likes.remove(id)
+                elif p:
+                    u.likes.append(id)
+                self.redirect('/?id=%s'%id)
+
             else: self.redirect('/')
         else: self.redirect('/signup')
 
@@ -455,5 +487,6 @@ app = webapp2.WSGIApplication([
     ('/login', LoginPage),
     ('/logout', LogOutPage),
     ('/comment', CommentPage),
-    ('/delete', DeletePage)
+    ('/delete', DeletePage),
+    ('/like', LikePage)
 ], debug=True)
