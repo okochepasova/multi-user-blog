@@ -64,7 +64,7 @@ def make_secure_val(s):
     return '%s|%s'%(s, hash_str(s))
 
 def check_secure_val(h):
-    val= h.split('|')[0]
+    val = h.split('|')[0]
     if h == make_secure_val(val):
         return val
 
@@ -74,12 +74,12 @@ def make_salt():
     return ''.join(random.choice(string.letters) for x in xrange(5))
 
 def make_pw_hash(name, pw, salt=''):
-    if not salt: salt= make_salt()
-    h= hashlib.sha256(name+pw+salt).hexdigest()
-    return h+"|"+salt
+    if not salt: salt = make_salt()
+    h = hashlib.sha256(name + pw + salt).hexdigest()
+    return '%s|%s'%(h, salt)
 
 def valid_pw(name, pw, h):
-    salt= h.split('|')[1]
+    salt = h.split('|')[1]
     return h == make_pw_hash(name, pw, salt)
 
 
@@ -99,11 +99,13 @@ class Post(db.Model):
     created = db.DateTimeProperty(auto_now_add = True)
     user = db.StringProperty(required = True)
 
+
 class User(db.Model):
     name = db.StringProperty(required = True)
     password = db.StringProperty(required = True)
     email = db.EmailProperty()
     likes = db.StringListProperty()
+
 
 class Comment(db.Model):
     post_id = db.IntegerProperty(required = True)
@@ -130,7 +132,7 @@ class Handler(webapp2.RequestHandler):
     def to_welcome(self, username):
         # Setting Cookies
         self.response.headers['Content-Type'] = 'text/plain'
-        user= make_secure_val(username)
+        user = make_secure_val(username)
         self.response.headers.add_header('Set-Cookie',
                                          str('username=%s; Path=/'%user))
         self.redirect('/welcome')
@@ -170,24 +172,24 @@ class MainPage(Handler):
 
         likes = []
         users = User.gql("WHERE name = '%s'"%name)
-        if name and users: likes =users.get().likes
+        if name and users: likes = users.get().likes
 
         # Button Data.
         # Case 0: NOT a valid User
-        act1= "window.location='/login';"
-        act2= "window.location='/login';"
-        act3= "window.location='/login';"
+        act1 = "window.location='/login';"
+        act2 = "window.location='/login';"
+        act3 = "window.location='/login';"
 
         if name and name == post.user:
             # Case 1: valid User matches current Post
-            act1= "window.location='/newpost?id=%d';"%id
-            act2= "window.location='/delete?id=%d';"%id
-            act3= "alert('Action not allowed.')"
+            act1 = "window.location='/newpost?id=%d';"%id
+            act2 = "window.location='/delete?id=%d';"%id
+            act3 = "alert('Action not allowed.')"
         elif name:
             # Case 2: valid User DOESN'T match current Post
-            act1= "alert('Action not allowed.')"
-            act2= "alert('Action not allowed.')"
-            act3= "window.location='/like?id=%d';"%id
+            act1 = "alert('Action not allowed.')"
+            act2 = "alert('Action not allowed.')"
+            act3 = "window.location='/like?id=%d';"%id
 
         # Output
         style = self.render_str('blog/main.css')
@@ -201,16 +203,16 @@ class MainPage(Handler):
 class NewPostPage(Handler):
     def run(self, subject='', content='', error=''):
         id = self.request.get('id')
-        hide='hidden'
+        hide = 'hidden'
 
         # Info 4 Editing a Post
         if id:
-            p=Post.get_by_id(long(id))
+            p = Post.get_by_id(long(id))
             if p and p.user == self.get_username():
-                hide=''
-                subject= p.subject
-                content= p.content
-            else: self.redirect('/?id='+str(id))
+                hide = ''
+                subject = p.subject
+                content = p.content
+            else: self.redirect('/?id=%s'%str(id))
 
         # Builds the Template
         style = self.render_str('edit_new/form.css')
@@ -223,24 +225,27 @@ class NewPostPage(Handler):
         else: self.redirect('/login')
 
     def post(self):
+        # Variables
         id = self.request.get('id')
         name = self.get_username()
         subject = self.request.get('subject')
         content = self.request.get('content')
 
         if subject and content:
+            # Editing a Post
             if id:
                 p = Post.get_by_id(long(id))
                 if p and p.user == name:
                     p.subject = subject
                     p.content = content
                     p.put()
+            # Creating a Post
             else:
-                p=Post(subject=subject, content=content, user=name)
+                p = Post(subject=subject, content=content, user=name)
                 id = p.put().id()
-            self.redirect('/?id='+str(id))
+            self.redirect('/?id=%s'%str(id))
         else:
-            error="We need both a subject and some content!"
+            error = "We need both a subject and some content!"
             self.run(subject, content, error)
 
 
@@ -255,42 +260,38 @@ class CommentPage(Handler):
         name = self.get_username()
         content = self.request.get('content')
 
-        if content:
-            if id:
-                id=long(id)
-                p = Post.get_by_id(id)
-                c = Comment.get_by_id(id)
-                # Creating new Comment
-                if p:
-                    c = Comment(post_id=id, user=name, content=content)
-                    c.put()
-                # Edditing Comment
-                elif c and c.user == name:
-                    c.content = content
-                    c.put()
-                    id = c.post_id
-                else: self.error_page(id)
+        if content and id:
+            id = long(id)
+            p = Post.get_by_id(id)
+            c = Comment.get_by_id(id)
 
-                self.redirect('/?id='+str(id))
-            else:
-                error='None<br>WTF did you do to get here? No SRL, tell me.'
-                self.error_page(error)
+            # Creating new Comment
+            if p:
+                c = Comment(post_id=id, user=name, content=content)
+                c.put()
+            # Edditing Comment
+            elif c and c.user == name:
+                c.content = content
+                c.put()
+                id = c.post_id
+            else: self.error_page(id)
+            self.redirect('/?id=%d'%id)
+
         else: self.run(content, "We need some content!")
 
     def run(self, content='', error=''):
         # Variables
         id = self.request.get('id')
-        hide='hidden'
+        hide = 'hidden'
 
         if id:
+            id = long(id)
             # Info 4 Editing a Comment
-            p = Post.get_by_id(long(id))
-            c = Comment.get_by_id(long(id))
+            c = Comment.get_by_id(id)
             if c and c.user == self.get_username():
-                hide=''
-                content= c.content
-            elif p: pass
-            else: self.redirect('/?id='+str(id))
+                hide = ''
+                content = c.content
+            else: self.redirect('/?id=%d'%id)
 
             # Builds the Template
             style = self.render_str('edit_new/form.css')
@@ -309,10 +310,10 @@ class SignupPage(Handler):
 
     def post(self):
         # Variables
-        user_error=''
-        pass_error=''
-        verify_error=''
-        email_error=''
+        user_error = ''
+        pass_error = ''
+        verify_error = ''
+        email_error = ''
 
         username = self.request.get('username')
         password = self.request.get('password')
@@ -323,26 +324,26 @@ class SignupPage(Handler):
 
         # Validation
         if not valid_username(username):
-            user_error="That's not a valid username."
+            user_error = "That's not a valid username."
 
         elif users.get():
-            user_error="That user already exists."
+            user_error = "That user already exists."
 
         if not valid_password(password):
-            pass_error="That's not a valid password."
+            pass_error = "That's not a valid password."
 
-        elif not (password==verify):
-            verify_error="Your passwords didn't match."
+        elif not (password == verify):
+            verify_error = "Your passwords didn't match."
 
         if email and (not valid_email(email)):
-            email_error="That's not a valid email."
+            email_error = "That's not a valid email."
 
         # Output
-        if (user_error+pass_error+verify_error+email_error):
-            self.run( user_error, pass_error, verify_error, email_error,
-            username, email )
+        if (user_error + pass_error + verify_error + email_error):
+            self.run(user_error, pass_error, verify_error, email_error,
+                     username, email)
         else:
-            pw = make_pw_hash(username,password)
+            pw = make_pw_hash(username, password)
             u = User(name=username, password=pw)
 
             if email: u.email = db.Email(email)
@@ -350,8 +351,9 @@ class SignupPage(Handler):
             u.put()
             self.to_welcome(username)
 
-    def run( self, user_error='', pass_error='', verify_error='',
-    email_error='', username='', email='' ):
+    def run(self, user_error='', pass_error='', verify_error='',
+            email_error='', username='', email=''):
+        # Builds the Template
         style = self.render_str('signup/main.css')
         self.render('signup/signup.html', style=style, user_error=user_error,
                     pass_error=pass_error, verify_error=verify_error,
@@ -362,9 +364,12 @@ class WelcomePage(Handler):
     def get(self):
         name = self.get_username()
 
-        if name:
-            self.write("<title>Welcome</title>\n")
-            self.write("<h1>Welcome, %s!</h1>\n"%name)
+        if name: self.write('''
+<!doctype html>
+<title>Welcome</title>
+<h1>Welcome, %s!</h1>
+<h2><a href='/'>To Blog</a></h2>
+'''%name)
         else: self.redirect('/signup')
 
 
