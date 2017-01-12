@@ -144,7 +144,7 @@ class Handler(webapp2.RequestHandler):
 class MainPage(Handler):
     def run(self):
         style = self.render_str('blog/main.css')
-        posts = Post.gql("ORDER BY created DESC LIMIT 10;")
+        posts = Post.gql('ORDER BY created DESC LIMIT 10')
        # del_data(posts)
         self.render('header.html', name=self.get_username())
         self.render('blog/home.html', style=style, posts=posts)
@@ -245,7 +245,7 @@ class NewPostPage(Handler):
                 id = p.put().id()
             self.redirect('/?id=%s'%str(id))
         else:
-            error = "We need both a subject and some content!"
+            error = 'We need both a subject and some content!'
             self.run(subject, content, error)
 
 
@@ -277,7 +277,7 @@ class CommentPage(Handler):
             else: self.error_page(id)
             self.redirect('/?id=%d'%id)
 
-        else: self.run(content, "We need some content!")
+        else: self.run(content, 'We need some content!')
 
     def run(self, content='', error=''):
         # Variables
@@ -320,14 +320,14 @@ class SignupPage(Handler):
         verify = self.request.get('verify')
         email = self.request.get('email')
 
-        users=User.gql("WHERE name = '%s';"%username)
+        users = User.gql("WHERE name = '%s';"%username)
 
         # Validation
         if not valid_username(username):
             user_error = "That's not a valid username."
 
         elif users.get():
-            user_error = "That user already exists."
+            user_error = 'That user already exists.'
 
         if not valid_password(password):
             pass_error = "That's not a valid password."
@@ -363,14 +363,13 @@ class SignupPage(Handler):
 class WelcomePage(Handler):
     def get(self):
         name = self.get_username()
-
-        if name: self.write('''
-<!doctype html>
-<title>Welcome</title>
-<h1>Welcome, %s!</h1>
-<h2><a href='/'>To Blog</a></h2>
-'''%name)
-        else: self.redirect('/signup')
+        if name:
+            self.write('<!doctype html>\n' +
+                       '<title>Welcome</title>\n' +
+                       '<h1>Welcome, %s!</h1>\n'%name +
+                       "<h2><a href='/'>To Blog</a></h2>\n")
+        else:
+            self.redirect('/signup')
 
 
 class LoginPage(Handler):
