@@ -34,10 +34,6 @@ template_dir = os.path.join(os.path.dirname(__file__), 'html')
 jinja_env = jinja2.Environment(loader = jinja2.FileSystemLoader(template_dir),
                                autoescape = True)
 
-USER_RE = re.compile(r"^[a-zA-Z0-9_-]{3,20}$")
-PASS_RE = re.compile(r"^.{3,20}$")
-EMAIL_RE = re.compile(r"^[\S]+@[\S]+.[\S]+$")
-
 SECRET = 'Uud@c1ty'
 
 
@@ -47,12 +43,15 @@ SECRET = 'Uud@c1ty'
 
 #Signup Page
 def valid_username(username):
+    USER_RE = re.compile(r"^[a-zA-Z0-9_-]{3,20}$")
     return USER_RE.match(username)
 
 def valid_password(password):
+    PASS_RE = re.compile(r"^.{3,20}$")
     return PASS_RE.match(password)
 
 def valid_email(email):
+    EMAIL_RE = re.compile(r"^[\S]+@[\S]+.[\S]+$")
     return EMAIL_RE.match(email)
 
 
@@ -127,7 +126,8 @@ class Handler(webapp2.RequestHandler):
 
     # Extra
     def get_username(self):
-        return check_secure_val(self.request.cookies.get('username'))
+        user = self.request.cookies.get('username')
+        if user: return check_secure_val(user)
 
     def to_welcome(self, username):
         # Setting Cookies
@@ -231,7 +231,9 @@ class NewPostPage(Handler):
         subject = self.request.get('subject')
         content = self.request.get('content')
 
-        if subject and content:
+        if not name:
+            self.redirect('/login')
+        elif subject and content:
             # Editing a Post
             if id:
                 p = Post.get_by_id(long(id))
@@ -274,10 +276,12 @@ class CommentPage(Handler):
                 c.content = content
                 c.put()
                 id = c.post_id
-            else: self.error_page(id)
-            self.redirect('/?id=%d'%id)
+            else:
+                self.error_page(id)
 
-        else: self.run(content, 'We need some content!')
+            self.redirect('/?id=%d'%id)
+        else:
+            self.run(content, 'We need some content!')
 
     def run(self, content='', error=''):
         # Variables
@@ -285,13 +289,18 @@ class CommentPage(Handler):
         hide = 'hidden'
 
         if id:
-            id = long(id)
             # Info 4 Editing a Comment
+            id = long(id)
+            p = Post.get_by_id(id)
             c = Comment.get_by_id(id)
+
             if c and c.user == self.get_username():
                 hide = ''
                 content = c.content
-            else: self.redirect('/?id=%d'%id)
+            elif p:
+                pass
+            else:
+                self.redirect('/?id=%d'%id)
 
             # Builds the Template
             style = self.render_str('edit_new/form.css')
@@ -441,7 +450,7 @@ class DeletePage(Handler):
                 c = Comment.get_by_id(id)
 
                 # Id of a Post
-                if p:
+                if p and p.user == name:
                     del_data(Comment.gql("WHERE post_id = %d"%id))
                     # Remove post from likes
                     for u in User.all():
@@ -452,7 +461,7 @@ class DeletePage(Handler):
                     self.redirect('/')
 
                 # Id of a Comment
-                elif c:
+                elif c and c.user == name:
                     id = c.post_id
                     c.delete()
                     self.redirect('/?id=%d'%id)
@@ -475,9 +484,9 @@ class LikePage(Handler):
                 u = User.gql("WHERE name = '%s'"%name).get()
                 id = str(id)
 
-                if p and (id in u.likes):
+                if p and p.user !=  name and (id in u.likes):
                     u.likes.remove(id)
-                elif p:
+                elif p and p.user !=  name:
                     u.likes.append(id)
 
                 u.put()
