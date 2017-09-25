@@ -13,7 +13,7 @@
     </div>
     <div class='post__time --smaller-text'>{{post.created.date()}}</div>
     <hr>
-    <p class='post__body --smaller-text'>{{post.content}}</p>
+    <pre class='post__body --smaller-text'>{{post.content}}</pre>
   </div>
   <button type="submit" onclick="window.location='/comment?id={{id}}';" >Comment</button>
 {% for c in comments %}

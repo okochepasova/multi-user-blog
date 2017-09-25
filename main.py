@@ -248,7 +248,7 @@ class NewPostPage(Handler):
             self.redirect('/?id=%s'%str(id))
         else:
             error = 'We need both a subject and some content!'
-            self.run(subject, content, error)
+            self.run(error=error)
 
 
 class CommentPage(Handler):
@@ -373,10 +373,13 @@ class WelcomePage(Handler):
     def get(self):
         name = self.get_username()
         if name:
+            style = self.render_str('signup/main.css')
             self.write('<!doctype html>\n' +
+                       '<style>%s</style>'%style +
                        '<title>Welcome</title>\n' +
                        '<h1>Welcome, %s!</h1>\n'%name +
-                       "<h2><a href='/'>To Blog</a></h2>\n")
+                       "<h2><a href='/' class='button --grey-btn'>To Blog" +
+                       '</a></h2>\n')
         else:
             self.redirect('/signup')
 
